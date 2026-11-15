@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My apps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0a0a;
+      --card: #161616;
+      --card-hover: #1c1c1c;
+      --line: #262626;
+      --ink: #fafafa;
+      --mute: #a3a3a3;
+      --dim: #737373;
+      --pill: #262626;
+      --area: #232323;
+      --stroke: #d4d4d4;
+    }
+
+    * {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .wrap {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 72px) clamp(16px, 4vw, 32px);
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .top h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .top span {
+      color: var(--mute);
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: block;
+      padding: 24px 24px 22px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: inherit;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    a.card:hover {
+      background: var(--card-hover);
+      border-color: #333;
+      transform: translateY(-2px);
+    }
+
+    a.card:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .name {
+      flex: 1;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .blur {
+      color: transparent;
+      text-shadow: 0 0 11px rgba(250, 250, 250, 0.9);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .desc .blur {
+      text-shadow: 0 0 10px rgba(163, 163, 163, 0.9);
+    }
+
+    .pill {
+      padding: 3px 11px;
+      background: var(--pill);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .desc {
+      margin: 14px 0 0;
+      color: var(--mute);
+      font-size: 16px;
+    }
+
+    .meta {
+      margin: 6px 0 0;
+      color: var(--dim);
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chart {
+      position: relative;
+      height: 86px;
+      margin-top: 18px;
+    }
+
+    .chart svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .empty {
+      padding: 40px 0;
+      color: var(--dim);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 420px) {
+      .card {
+        padding: 20px 18px 18px;
+      }
+
+      .name {
+        font-size: 17px;
+      }
+
+      .pill {
+        font-size: 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card {
+        transition: none;
+      }
+
+      a.card:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <h1>My apps</h1>
+      <span id="total"></span>
+    </header>
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <script>
+    const APPS = [
+      {
+        name: "Fo",
+        nameHidden: 7,
+        text: "Put your Copilot chats into folders",
+        link: "",
+        users: 128,
+        downloads: 240,
+        history: [12, 20, 31, 38, 52, 61, 70, 84, 97, 110, 121, 128],
+        hidden: true
+      }
+    ];
+
+    const format = (n) => n.toLocaleString("en-US");
+    const plural = (n, word) => `${format(n)} ${word}${n === 1 ? "" : "s"}`;
+    const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    const randomText = (length, words) => {
+      const letters = "abcdefghijklmnopqrstuvwxyz";
+      let text = "";
+      let nextSpace = 3 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < length; i++) {
+        if (words && i === nextSpace && i < length - 2) {
+          text += " ";
+          nextSpace = i + 3 + Math.floor(Math.random() * 5);
+        } else {
+          text += letters[Math.floor(Math.random() * letters.length)];
+        }
+      }
+      return text;
+    };
+
+    const partly = (shown, hidden, words) => {
+      const blurred = hidden ? `<span class="blur" aria-hidden="true">${randomText(hidden, words)}</span>` : "";
+      const gap = words && shown && hidden ? " " : "";
+      return `${escape(shown || "")}${gap}${blurred}`;
+    };
+
+    const renderCard = (app, index) => {
+      const link = app.hidden ? "" : app.link;
+      const tag = link ? "a" : "div";
+      const href = link ? ` href="${escape(link)}" target="_blank" rel="noopener"` : "";
+      const name = `<div class="name">${partly(app.name, app.nameHidden, false)}</div>`;
+      const desc = app.text || app.textHidden ? `<p class="desc">${partly(app.text, app.textHidden, true)}</p>` : "";
+
+      return `
+        <${tag} class="card"${href}>
+          <div class="head">
+            ${name}
+            <div class="pill">${plural(app.users, "user")}</div>
+          </div>
+          ${desc}
+          <p class="meta">${plural(app.downloads, "download")}</p>
+          <div class="chart"><svg data-index="${index}" aria-hidden="true"></svg></div>
+        </${tag}>`;
+    };
+
+    const drawChart = (svg) => {
+      const data = APPS[svg.dataset.index].history || [];
+      const width = svg.clientWidth;
+      const height = svg.clientHeight;
+
+      if (data.length < 2 || !width) {
+        svg.innerHTML = "";
+        return;
+      }
+
+      const max = Math.max(...data);
+      const min = Math.min(...data, 0);
+      const pad = 3;
+      const points = data.map((value, i) => [
+        (i / (data.length - 1)) * width,
+        pad + (1 - (value - min) / (max - min || 1)) * (height - pad * 2)
+      ]);
+
+      const path = (pts) => pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+      const area = `${path(points)} L${width} ${height} L0 ${height} Z`;
+
+      svg.innerHTML = `
+        <path d="${area}" fill="var(--area)" />
+        <path d="${path(points.slice(0, -1))}" fill="none" stroke="var(--stroke)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" />
+        <path d="${path(points.slice(-2))}" fill="none" stroke="var(--dim)" stroke-width="1.5" stroke-dasharray="4 4" stroke-linecap="round" />`;
+    };
+
+    const grid = document.getElementById("grid");
+    const totalUsers = APPS.reduce((sum, app) => sum + app.users, 0);
+
+    document.getElementById("total").textContent = plural(totalUsers, "user");
+    grid.innerHTML = APPS.length ? APPS.map(renderCard).join("") : `<p class="empty">No apps yet</p>`;
+
+    const observer = new ResizeObserver((entries) => entries.forEach((entry) => drawChart(entry.target)));
+    grid.querySelectorAll("svg[data-index]").forEach((svg) => {
+      drawChart(svg);
+      observer.observe(svg);
+    });
+  </script>
+</body>
+</html>
